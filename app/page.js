@@ -8,6 +8,7 @@ export default function Home() {
   const [inventory, setInventroy] = useState([])
   const [open,setOpen] = useState(false)
   const [itemName,setItemName] = useState('')
+  const [itemSearch,setItemSearch] = useState('')
 
 
   const updateInventory = async () => {
@@ -26,6 +27,7 @@ export default function Home() {
   const addItem = async (item) => {
     const docRef = doc(collection(firestore, 'inventory'),item)
     const docSnap = await getDoc(docRef)
+    console.log(docSnap);
     if(docSnap.exists()){
       const {quantity} = docSnap.data()
       await setDoc(docRef, {quantity: quantity + 1})
@@ -34,7 +36,16 @@ export default function Home() {
     }
     await updateInventory()
   }
+  const updateSearch = async(item)=>{
+    console.log("we here");
 
+    for(let i = 0; i < inventory.length; i++)
+    {
+      if(inventory[i].name.startsWith(item))
+
+        console.log(inventory[i].name);
+    }
+  }
   const removeItem = async (item) => {
     const docRef = doc(collection(firestore, 'inventory'),item)
     const docSnap = await getDoc(docRef)
@@ -112,6 +123,25 @@ export default function Home() {
       handleOpen()
     }}
     >Add New Item</Button>
+
+
+    <TextField 
+    value={itemSearch}
+    variant="outlined"
+    placeholder="Search"
+   onChange={(e) =>{
+      setItemSearch(e.target.value)
+      
+    }}
+    ></TextField>
+    <Button
+        variant="outlined" 
+        onClick={()=>{
+          updateSearch(itemSearch)
+        }}
+        >Search</Button>
+
+
     <Box border="1px solid #333">
       <Box 
         width="800px" 
@@ -125,8 +155,8 @@ export default function Home() {
           Inventory Items
         </Typography>
       </Box>
-    
-      <stack width = "800px" height = "300px" spacing={2} overflow="auto">
+
+      <Stack width = "800px" height = "300px" spacing={2} overflow="auto">
         {inventory.map(({name,quantity})=> (
           <Box 
             key={name} 
@@ -137,12 +167,16 @@ export default function Home() {
             justifyContent="space-between" 
             bgcolor='#f0f0f0' 
             padding={5}>
-            <Typography variant='h3' color="#333" textAlign="center">{name.charAt(0).toUpperCase() + name.slice(1)}</Typography>
-            <Typography variant='h3' color="#333" textAlign="center">{quantity}</Typography>
+            <Typography variant='h3' color="#333" textAlign="center">
+              {name.charAt(0).toUpperCase() + name.slice(1)}
+              </Typography>
+            <Typography variant='h3' color="#333" textAlign="center">
+              {quantity}</Typography>
+            <Button variant="contained" onClick={() =>{addItem(name)}}>Add</Button>
             <Button variant="contained" onClick={() =>{removeItem(name)}}>Remove</Button>
           </Box>
         ))}
-      </stack>
+      </Stack>
     </Box>
     </Box>
 }
